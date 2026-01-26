@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
-export const LoginForm = () => {
+export const LoginForm = ({ callbackUrl }: { callbackUrl?: string }) => {
   const [email, setEmail] = useState("");
 
   const [error, setError] = useState<string | undefined>("");
@@ -24,7 +24,10 @@ export const LoginForm = () => {
           if (data?.error) return setError(data?.error);
 
           setSuccess(data?.message);
-          router.push(`/auth/security/${data.email}`);
+          const securityUrl = `/auth/security/${data.email}${
+            callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
+          }`;
+          router.push(securityUrl);
         })
         .catch(() => {
           return setError("Something went wrong!");

@@ -3,9 +3,29 @@ import { MenuNavbar } from "@/components/Navbar";
 import { auth } from "@/auth";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { LoginButton } from "./_components/LoginButton";
 
-export default async function Menu() {
+export default async function Menu({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string; [key: string]: string | undefined }>;
+}) {
   const session = await auth();
+  const params = await searchParams;
+
+  // Auto-redirect logged-in users based on type param
+  if (session?.user?.id && params.type) {
+    const queryString = new URLSearchParams(
+      params as Record<string, string>
+    ).toString();
+    if (params.type === "deposit") {
+      redirect(`/buy?${queryString}`);
+    } else if (params.type === "withdraw") {
+      redirect(`/sell?${queryString}`);
+    }
+  }
 
   return (
     <main className="grid gap-y-2">
@@ -46,12 +66,15 @@ export default async function Menu() {
           </div>
 
           <div>
-            <Link
-              href="/auth/login"
-              className="bg-primary text-base text-white flex items-center justify-center p-2 w-full rounded-md"
+            <Suspense
+              fallback={
+                <div className="bg-primary text-base text-white flex items-center justify-center p-2 w-full rounded-md">
+                  Login
+                </div>
+              }
             >
-              Login
-            </Link>
+              <LoginButton />
+            </Suspense>
           </div>
         </div>
       )}

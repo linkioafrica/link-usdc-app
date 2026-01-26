@@ -4,8 +4,14 @@ import { LoginForm } from "./_components/loginForm";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
-export default async function Login() {
+export default async function Login({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
   const session = await auth();
+  const params = await searchParams;
+
   if (session?.user?.id) return redirect("/");
 
   return (
@@ -21,7 +27,7 @@ export default async function Login() {
         </p>
       </div>
 
-      <LoginForm />
+      <LoginForm callbackUrl={params.callbackUrl} />
     </main>
   );
 }
