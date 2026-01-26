@@ -22,6 +22,7 @@ export const ConfirmForm = ({ hasKYC }: { hasKYC: boolean }) => {
   const { rampData } = useRampContext();
   const router = useRouter();
 
+  console.log(buyData);
   const findNetwork = networkOptions.find(
     (item) => item.label === buyData?.network
   );

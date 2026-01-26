@@ -25,6 +25,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.email = token.email as string;
         session.user.name = token.name as string;
         session.user.hasDW = token.hasDW as boolean;
+        session.user.customerId = token.customerId as string;
+        session.user.verified = token.verified as boolean;
       }
 
       return session;
@@ -36,9 +38,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const existingAccount = await getUserById(token.sub);
       if (!existingAccount) return null;
 
-      token.hasKyc = existingAccount?.data?.hasKYC;
       token.name = existingAccount?.data?.name;
+      token.hasKyc = existingAccount?.data?.hasKYC;
       token.hasDW = existingAccount?.data?.hasDW;
+      token.customerId = existingAccount?.data?.accure_customer_id;
+      token.verified = existingAccount?.data?.accrue_verified;
 
       return token;
     },

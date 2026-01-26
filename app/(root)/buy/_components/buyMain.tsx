@@ -150,14 +150,6 @@ let selectedVendorBanks = AllVendorBankList?.filter(
     return setReceiveAmount(Number(receiveAmountFixed));
   };
 
-  // Params from URL
-  let businessParam = useSearchParams().get("business_id");
-  let businessTidParam = useSearchParams().get("business_tid");
-  let orderIdParam = useSearchParams().get("order_id");
-  let amountParam = useSearchParams().get("amount");
-  let sendAssetParam = useSearchParams().get("send_asset") as string;
-  let receiveAssetParam = useSearchParams().get("received_asset") as string;
-  let paymentTypeParam = useSearchParams().get("payment_type");
 
   useEffect(() => {
     if (sendAmount > selectedCurLimits?.maximumBuy) {
@@ -195,10 +187,6 @@ let selectedVendorBanks = AllVendorBankList?.filter(
       merchant_fee: fees,
       rate: String(rate),
       reference: reference,
-      business_id: businessParam || "56781285",
-      payment_type: paymentTypeParam as string,
-      order_id: orderIdParam as string,
-      business_tid: businessTidParam as string,
     });
     setBuyData({
       ...buyData,
@@ -219,18 +207,14 @@ let selectedVendorBanks = AllVendorBankList?.filter(
   };
 
   const findSendOption = fiatOptions?.find(
-    (option) => option?.value === sendAssetParam
+    (option) => option?.value === sendAsset.value
   );
 
   const findReceiveOption = stablesOptions?.find(
-    (option: any) => option?.value === receiveAssetParam
+    (option: any) => option?.value === receiveAsset.value
   );
 
   useEffect(() => {
-    if (amountParam) {
-      setSendAmount(Number(amountParam));
-    }
-
     if (findSendOption === undefined || findReceiveOption === undefined) {
       setSendAsset({
         value: "ngn",
