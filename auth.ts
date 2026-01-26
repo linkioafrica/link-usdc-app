@@ -1,0 +1,49 @@
+import NextAuth from "next-auth";
+import authConfig from "./auth.config";
+import { getUserById } from "./lib/user";
+
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  pages: {
+    signIn: "/auth/login",
+    error: "/auth/login",
+  },
+
+  callbacks: {
+    async signIn({ user }) {
+      if (user) return true;
+
+      return false;
+    },
+
+    async session({ token, session }) {
+      if (token.sub && session.user) {
+        session.user.id = token.sub;
+      }
+
+      if (session.user) {
+        session.user.hasKyc = token.hasKyc as boolean;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
+        session.user.hasDW = token.hasDW as boolean;
+      }
+
+      return session;
+    },
+
+    async jwt({ token }) {
+      if (!token.sub) return null;
+
+      const existingAccount = await getUserById(token.sub);
+      if (!existingAccount) return null;
+
+      token.hasKyc = existingAccount?.data?.hasKYC;
+      token.name = existingAccount?.data?.name;
+      token.hasDW = existingAccount?.data?.hasDW;
+
+      return token;
+    },
+  },
+
+  session: { strategy: "jwt" },
+  ...authConfig,
+});
