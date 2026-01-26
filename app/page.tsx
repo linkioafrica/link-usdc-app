@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 export default function Home() {
-  redirect("/buy");
+  redirect("/menu");
   return (
     <main>
       <section className="flex items-center justify-between">

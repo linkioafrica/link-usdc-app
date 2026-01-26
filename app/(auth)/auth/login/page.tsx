@@ -10,7 +10,7 @@ export default async function Login() {
 
   return (
     <main>
-      <Navbar route="/buy" />
+      <Navbar route="/" />
 
       <div className="my-9 space-y-3">
         <div className="flex items-center justify-center">

@@ -13,23 +13,6 @@ export default async function Menu() {
 
       {session?.user?.id ? (
         <div>
-          <Link href="/buy">
-            <div className="border border-slate-200 flex items-center justify-between py-1 px-2 rounded">
-              <div className="flex items-center space-x-1">
-                <button className="bg-p-light text-primary cursor-default flex items-center justify-center rounded-full p-1.5">
-                  <span className="material-symbols-rounded">home</span>
-                </button>
-                <p className="font-medium">Home</p>
-              </div>
-
-              <button>
-                <span className="material-icons-round text-sm">
-                  arrow_forward_ios
-                </span>
-              </button>
-            </div>
-          </Link>
-
           <Link href="/history">
             <div className="border border-slate-200 flex items-center justify-between py-1 px-2 mt-2 rounded">
               <div className="flex items-center space-x-1">
@@ -128,7 +111,7 @@ export default async function Menu() {
             </div>
           </Link>
 
-          {/* 
+          {/*
         <Link
           href="https://playful-radish-285.notion.site/Terms-Conditions-f8cb83774bc14cb29423d29d1ab08a50"
           passHref={true}

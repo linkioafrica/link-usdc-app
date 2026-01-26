@@ -9,14 +9,12 @@ import {
   AllCurrencyReceiver,
   AllCurrencyBuyFees,
 } from "@/constant/constant";
-
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRampContext } from "@/contexts/ramp.context";
 import { useBuyContext } from "@/contexts/buy.context";
 import { useBuyRatesContext } from "@/contexts/buyRates.context";
 import { Input } from "@/components/ui/input";
-
 import {
   Listbox,
   ListboxButton,
@@ -425,10 +423,10 @@ let selectedVendorBanks = AllVendorBankList?.filter(
             1 {findOption?.label} = {rate} {sendAsset?.value.toUpperCase()}
           </p>
         </div>
-        <div className="flex items-center justify-between">
+        {/* <div className="flex items-center justify-between">
           <p>Merchant fee</p>
           <p>{fees}%</p>
-        </div>
+        </div> */}
       </div>
 
       <div className="my-20">

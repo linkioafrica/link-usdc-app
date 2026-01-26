@@ -22,7 +22,6 @@ import {
 } from "@headlessui/react";
 import { CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
-
 import Image from "next/image";
 
 type SortedCurrency =
@@ -35,7 +34,7 @@ type SortedCurrency =
 
 export const SellMain = ({ session_email }: { session_email: string }) => {
   // Get list of receiving currencies based on Stable selected
-  const [sendAsset, setSendAsset] = useState(stablesOptions[3]);
+  const [sendAsset, setSendAsset] = useState(stablesOptions[0]);
 
   const sortedReceiveCurrencies: SortedCurrency = AllStablesReceiver.filter(
     (item) => item.stable === sendAsset.value
@@ -190,10 +189,10 @@ export const SellMain = ({ session_email }: { session_email: string }) => {
 
     if (findSendOption === undefined || findReceiveOption === undefined) {
       setSendAsset({
-        value: "usdc_polygon",
+        value: "usdc_stellar",
         label: "USDC",
-        img: "/assets/svg/otc/usdc-polygon.svg",
-        network: "matic",
+        img: "/assets/svg/otc/usdc-stellar.svg",
+        network: "stellar",
       });
       setReceiveAsset({
         value: "ngn",
@@ -208,20 +207,6 @@ export const SellMain = ({ session_email }: { session_email: string }) => {
 
     if (findReceiveOption) {
       setReceiveAsset(findReceiveOption);
-    }
-
-    if (findSendOption?.value === "ngnc_polygon") {
-      setSendAsset({
-        value: "ngnc_polygon",
-        label: "NGNC",
-        img: "/assets/svg/otc/ngnc-polygon.svg",
-        network: "matic",
-      });
-      setReceiveAsset({
-        value: "ngn",
-        label: "NGN",
-        img: "/assets/svg/fiat/ngn.svg",
-      });
     }
   }, []);
 
@@ -394,10 +379,10 @@ export const SellMain = ({ session_email }: { session_email: string }) => {
             1 {findOption?.label} = {rate} {receiveAsset?.value.toUpperCase()}
           </p>
         </div>
-        <div className="flex items-center justify-between">
+        {/* <div className="flex items-center justify-between">
           <p>Merchant fee</p>
           <p>{fees}%</p>
-        </div>
+        </div> */}
       </div>
 
       <div className="my-20">

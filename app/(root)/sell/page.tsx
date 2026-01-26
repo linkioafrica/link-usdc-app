@@ -7,7 +7,7 @@ export default async function Sell() {
 
   return (
     <main>
-      <Navbar title="Sell stables" route="/sell/options" />
+      <Navbar/>
       <SellMain session_email={session?.user?.email as string} />
     </main>
   );

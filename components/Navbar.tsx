@@ -20,19 +20,8 @@ export const Navbar = ({
 
   return (
     <nav className="relative flex items-center justify-between gap-5 mb-3">
-      {path === "/buy" || path === "/sell/options" ? (
-        // menuItems.map((item, index) => (
-        //   <Link
-        //     href={item?.href}
-        //     key={index}
-        //     className={`${
-        //       path.indexOf(item.href) !== -1 ? "text-primary" : "text-gray-400"
-        //     } block text-base font-medium`}
-        //   >
-        //     {item?.name}
-        //   </Link>
-        // ))
-        <div className="flex items-center justify-between w-full">
+      {(path === "/buy" || path === "/buy/confirm" || path === "/buy/pop") && (
+        <div className="flex items-center w-full justify-center">
           <Link
             href="/buy"
             className={`${
@@ -41,8 +30,12 @@ export const Navbar = ({
           >
             Buy Stables
           </Link>
+        </div>
+      )}
+      {(path === "/sell" || path === "/sell/confirm" || path === "/sell/pop") && (
+        <div className="flex items-center w-full justify-center">
           <Link
-            href="/sell/options"
+            href="/sell"
             className={`${
               path.indexOf("/sell") !== -1 ? "text-primary" : "text-gray-400"
             } block text-base font-medium`}
@@ -50,16 +43,9 @@ export const Navbar = ({
             Sell Stables
           </Link>
         </div>
-      ) : (
-        <div
-          onClick={() => {
-            if (route) navigate.push(route);
-            else navigate.back();
-          }}
-          className="bg-p-light cursor-pointer text-primary flex items-center justify-center rounded-full p-1.5"
-        >
-          <span className="material-icons-round">arrow_back</span>
-        </div>
+      )}
+      {!(path === "/buy" || path === "/buy/confirm" || path === "/buy/pop" || path === "/sell" || path === "/sell/confirm" || path === "/sell/pop") && (
+        <></>
       )}
 
       {title && <p className="font-medium text-lg">{title}</p>}

@@ -27,11 +27,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={sora.className}>
-        <div>
+        {/* <div>
           <Header />
-        </div>
+        </div> */}
 
-        <div className="absolute -bottom-2 -z-10 h-full w-full overflow-y-auto">
+        <div className="absolute -bottom-36 -z-10 h-full w-full">
           <Image src="/assets/png/bg-img.jpg" alt="bg" fill />
         </div>
 
