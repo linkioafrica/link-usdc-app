@@ -52,12 +52,52 @@ export const validate2FACode = async (
   }
 
   try {
+    // Sign in - this validates OTP internally via credentials provider
+    // Don't call getUserByCode separately as it would consume the OTP
     await signIn("credentials", {
       email,
       code,
-      redirectTo: callbackUrl || DEFAULT_LOGIC_REDIRECT,
+      redirect: false,
     });
-    return { success: "success" };
+
+    // After successful sign-in, get the session to access user data
+    const session = await auth();
+    const user = session?.user;
+
+    // Parse callbackUrl to get type param
+    let type: string | null = null;
+    let queryParams = "";
+
+    if (callbackUrl) {
+      try {
+        const url = new URL(callbackUrl, "http://localhost");
+        type = url.searchParams.get("type");
+        queryParams = url.searchParams.toString();
+      } catch {
+        // If URL parsing fails, use defaults
+      }
+    }
+
+    // Determine redirect based on verification status from session
+    const isFullyVerified = user?.hasKyc && user?.verified && user?.customerId;
+
+    let redirectTo: string;
+    if (isFullyVerified) {
+      // Fully verified user - go directly to buy/sell
+      if (type === "withdraw") {
+        redirectTo = queryParams ? `/sell?${queryParams}` : "/sell";
+      } else {
+        redirectTo = queryParams ? `/buy?${queryParams}` : "/buy";
+      }
+    } else {
+      // Needs KYC or verification - go to ID page
+      const returnTo = type === "withdraw" ? "sell" : "buy";
+      redirectTo = queryParams
+        ? `/buy/id?${queryParams}&returnTo=${returnTo}`
+        : `/buy/id?returnTo=${returnTo}`;
+    }
+
+    return { success: true, redirectTo };
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -139,5 +179,26 @@ export const accNumberValidate = async ({
     return await request.json();
   } catch (error: any) {
     return { message: error?.Error };
+  }
+};
+
+// Case B: Customer verification/creation action (placeholder endpoint)
+// TODO: Update endpoint when backend is ready
+export const verifyCustomerAction = async ({ name }: { name: string }) => {
+  const session = await auth();
+
+  try {
+    const response = await fetch(`${server}/onchain/verify-customer`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customer_id: session?.user?.id,
+        name: name,
+      }),
+    });
+
+    return await response.json();
+  } catch (error: any) {
+    return { status: 400, message: error?.message || "Something went wrong" };
   }
 };

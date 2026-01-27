@@ -6,6 +6,8 @@ export type ExtendedUser = DefaultSession["user"] & {
   hasDW: boolean;
   customerId?: string;
   verified?: boolean;
+  userIdNumber?: string;
+  userIdType?: string;
 };
 
 declare module "next-auth" {

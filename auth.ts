@@ -27,6 +27,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.hasDW = token.hasDW as boolean;
         session.user.customerId = token.customerId as string;
         session.user.verified = token.verified as boolean;
+        session.user.userIdNumber = token.userIdNumber as string;
+        session.user.userIdType = token.userIdType as string;
       }
 
       return session;
@@ -43,6 +45,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       token.hasDW = existingAccount?.data?.hasDW;
       token.customerId = existingAccount?.data?.accure_customer_id;
       token.verified = existingAccount?.data?.accrue_verified;
+      token.userIdNumber = existingAccount?.data?.id_number;
+      token.userIdType = existingAccount?.data?.id_type;
 
       return token;
     },

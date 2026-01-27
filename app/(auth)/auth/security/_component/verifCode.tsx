@@ -5,7 +5,7 @@ import { FormError, FormSuccess } from "@/components/FormStatus";
 import { Input } from "@/components/ui/input";
 
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 
 export const VerifCode = ({ email }: { email: string }) => {
@@ -18,19 +18,24 @@ export const VerifCode = ({ email }: { email: string }) => {
   const [isPending, startTransition] = useTransition();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "";
+  const router = useRouter();
 
   const handleSubmit = useCallback(() => {
     startTransition(async () => {
       await validate2FACode(decodedEmail, code, callbackUrl)
         .then((data) => {
           if (data?.error) return setError(data?.error);
-          if (data?.success) return setSuccess(data?.success);
+          if (data?.success && data?.redirectTo) {
+            setSuccess("Success!");
+            // Redirect to the determined route based on user verification status
+            router.push(data.redirectTo);
+          }
         })
         .catch(() => {
           setError("Something went wrong!");
         });
     });
-  }, [code, decodedEmail, callbackUrl]);
+  }, [code, decodedEmail, callbackUrl, router]);
 
   useEffect(() => {
     if (code.length === 6) {

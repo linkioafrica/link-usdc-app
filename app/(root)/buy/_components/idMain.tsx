@@ -1,6 +1,6 @@
 "use client";
 
-import { kycActions } from "@/actions/auth.actions";
+import { kycActions, verifyCustomerAction } from "@/actions/auth.actions";
 import { FormError, FormSuccess } from "@/components/FormStatus";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,15 +14,46 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
-export const IDMain = ({ route }: { route?: string }) => {
+interface IDMainProps {
+  route?: string;
+  hasKyc: boolean;
+  verified: boolean;
+  customerId?: string;
+  userName?: string;
+  userIdNumber?: string;
+  userIdType?: string;
+}
+
+export const IDMain = ({
+  route,
+  hasKyc,
+  verified,
+  customerId,
+  userName,
+  userIdNumber,
+  userIdType,
+}: IDMainProps) => {
   const [isPending, startTransition] = useTransition();
 
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
 
-  const [idType, setIdType] = useState("");
+  const [idType, setIdType] = useState(userIdType || "");
+  const [name, setName] = useState(userName || "");
 
   const navigate = useRouter();
+
+  // Determine which case we're in
+  const isFullyVerified = hasKyc && verified && customerId;
+  const needsKyc = !hasKyc;
+  const needsVerification = hasKyc && (!verified || !customerId);
+
+  // Case C: Auto-redirect if fully verified
+  useEffect(() => {
+    if (isFullyVerified && route) {
+      navigate.push(route);
+    }
+  }, [isFullyVerified, route, navigate]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -35,84 +66,193 @@ export const IDMain = ({ route }: { route?: string }) => {
     return () => clearTimeout(timeout);
   }, [error, success]);
 
-  const handleContinue = async (event: FormData) => {
+  // Case A: Handle KYC submission (no KYC yet)
+  const handleKycSubmit = async (event: FormData) => {
     await kycActions({
       id_type: idType,
       id_number: event?.get("id_number") as string,
     })
       .then(async (data) => {
         if (data.status === 400) return setError(data?.message);
-        // await update({
-        //   ...session?.user,
-        //   hasKYC: data?.data?.hasKYC,
-        // });
 
         setSuccess(data?.message);
-        return navigate.push(route ? route : "/buy/payment");
+        return navigate.push(route ? route : "/buy");
       })
       .catch(() => {
         setError("Something went wrong");
       });
   };
 
-  return (
-    <form>
-      <FormError message={error} />
-      <FormSuccess message={success} />
+  // Case B: Handle name verification submission
+  const handleVerificationSubmit = async (event: FormData) => {
+    const submittedName = event?.get("name") as string;
 
-      <div className="space-y-5 mt-5">
-        <div>
-          <label htmlFor="id_type" className="text-sm text-slate-500">
-            ID Type
-          </label>
-          <Select onValueChange={(value) => setIdType(value)} required>
-            <SelectTrigger className="w-full outline-none bg-slate-100 py-5 rounded-md border-none text-base">
-              <SelectValue placeholder="" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="bvn">BVN</SelectItem>
-              <SelectItem value="nin">NIN</SelectItem>
-              <SelectItem value="vin">Voters Card</SelectItem>
-              {/* <SelectItem value="dl">Driving License</SelectItem> */}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label htmlFor="id_number" className="text-sm text-slate-500">
-            ID number
-          </label>
-          <Input
-            type="id_number"
-            name="id_number"
-            disabled={idType === "" ? true : false}
-            required
-            className="outline-none bg-slate-100 py-5 rounded-md border-none text-base"
-          />
-        </div>
+    await verifyCustomerAction({ name: submittedName })
+      .then(async (data) => {
+        if (data.status === 400) return setError(data?.message);
+
+        setSuccess(data?.message || "Verification successful!");
+        return navigate.push(route ? route : "/buy");
+      })
+      .catch(() => {
+        setError("Something went wrong");
+      });
+  };
+
+  // Case C: Show loading while redirecting
+  if (isFullyVerified) {
+    return (
+      <div className="flex items-center justify-center my-32">
+        <Image
+          src="/assets/progress_activity.svg"
+          alt="progress_activity"
+          className="animate-spin"
+          width={24}
+          height={24}
+        />
       </div>
+    );
+  }
 
-      <div className="my-32">
-        <button
-          type="submit"
-          disabled={isPending}
-          formAction={(event) => startTransition(() => handleContinue(event))}
-          className={
-            "bg-primary text-base text-white flex items-center justify-center p-2 btn_position rounded-md"
-          }
-        >
-          {isPending ? (
-            <Image
-              src="/assets/progress_activity.svg"
-              alt="progress_activity"
-              className="animate-spin"
-              width={24}
-              height={24}
+  // Case A: KYC form (user has no KYC)
+  if (needsKyc) {
+    return (
+      <form>
+        <h2 className="text-center text-lg font-semibold mb-4">Fill KYC details below</h2>
+        <FormError message={error} />
+        <FormSuccess message={success} />
+
+        <div className="space-y-5 mt-5">
+          <div>
+            <label htmlFor="id_type" className="text-sm text-slate-500">
+              ID Type
+            </label>
+            <Select onValueChange={(value) => setIdType(value)} required>
+              <SelectTrigger className="w-full outline-none bg-slate-100 py-5 rounded-md border-none text-base">
+                <SelectValue placeholder="" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="bvn">BVN</SelectItem>
+                <SelectItem value="nin">NIN</SelectItem>
+                <SelectItem value="vin">Voters Card</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label htmlFor="id_number" className="text-sm text-slate-500">
+              ID number
+            </label>
+            <Input
+              type="text"
+              name="id_number"
+              disabled={idType === ""}
+              required
+              className="outline-none bg-slate-100 py-5 rounded-md border-none text-base"
             />
-          ) : (
-            "Continue"
-          )}
-        </button>
-      </div>
-    </form>
-  );
+          </div>
+        </div>
+
+        <div className="my-32">
+          <button
+            type="submit"
+            disabled={isPending}
+            formAction={(event) =>
+              startTransition(() => handleKycSubmit(event))
+            }
+            className="bg-primary text-base text-white flex items-center justify-center p-2 btn_position rounded-md"
+          >
+            {isPending ? (
+              <Image
+                src="/assets/progress_activity.svg"
+                alt="progress_activity"
+                className="animate-spin"
+                width={24}
+                height={24}
+              />
+            ) : (
+              "Continue"
+            )}
+          </button>
+        </div>
+      </form>
+    );
+  }
+
+  // Case B: Name verification form (has KYC but not verified/no customerId)
+  if (needsVerification) {
+    return (
+      <form>
+        <h2 className="text-center text-lg font-semibold my-2">Verify Your details</h2>
+        <FormError message={error} />
+        <FormSuccess message={success} />
+
+        <div className="space-y-5 mt-5">
+          <div>
+            <label htmlFor="name" className="text-sm text-slate-500">
+              Confirm your name
+            </label>
+            <Input
+              type="text"
+              name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="outline-none bg-slate-100 py-5 rounded-md border-none text-base"
+            />
+          </div>
+          <div>
+             <label htmlFor="id_type" className="text-sm text-slate-500">
+             Confirm your ID Type
+            </label>
+            <Input
+              type="text"
+              name="id_type"
+              value={userIdType}
+              disabled
+              required
+              className="outline-none bg-slate-100 py-5 rounded-md border-none text-base"
+            />
+          </div>
+          <div>
+            <label htmlFor="id_number" className="text-sm text-slate-500">
+              Confirm your ID number
+            </label>
+            <Input
+              type="text"
+              name="id_number"
+              value={userIdNumber}
+              disabled
+              required
+              className="outline-none bg-slate-100 py-5 rounded-md border-none text-base"
+            />
+          </div>
+        </div>
+
+        <div className="my-32">
+          <button
+            type="submit"
+            disabled={isPending}
+            formAction={(event) =>
+              startTransition(() => handleVerificationSubmit(event))
+            }
+            className="bg-primary text-base text-white flex items-center justify-center p-2 btn_position rounded-md"
+          >
+            {isPending ? (
+              <Image
+                src="/assets/progress_activity.svg"
+                alt="progress_activity"
+                className="animate-spin"
+                width={24}
+                height={24}
+              />
+            ) : (
+              "Confirm"
+            )}
+          </button>
+        </div>
+      </form>
+    );
+  }
+
+  return null;
 };

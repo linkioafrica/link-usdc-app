@@ -1,7 +1,10 @@
 import { IDMain } from "@/app/(root)/buy/_components/idMain";
 import { Navbar } from "@/components/Navbar";
+import { auth } from "@/auth";
 
 export default async function Identification() {
+  const session = await auth();
+
   return (
     <main>
       <Navbar title="Identification" />
@@ -12,7 +15,13 @@ export default async function Identification() {
         </p>
       </div>
 
-      <IDMain route="/sell/direct/create/add-account" />
+      <IDMain
+        route="/sell/direct/create/add-account"
+        hasKyc={session?.user?.hasKyc ?? false}
+        verified={session?.user?.verified ?? false}
+        customerId={session?.user?.customerId}
+        userName={session?.user?.name ?? undefined}
+      />
     </main>
   );
 }

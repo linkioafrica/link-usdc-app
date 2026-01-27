@@ -29,7 +29,6 @@ export const getUserByCode = async (email: string, code: string) => {
       code: code,
     }),
   });
-
   const user = await request.json();
 
   return user;
