@@ -5,18 +5,10 @@ import Link from "next/link";
 
 export const LoginButton = () => {
   const searchParams = useSearchParams();
-  const type = searchParams.get("type");
   const params = searchParams.toString();
 
-  // Determine destination based on type param
-  let callbackUrl = "/buy"; // default
-  if (type === "deposit" && params) {
-    callbackUrl = `/buy?${params}`;
-  } else if (type === "withdraw" && params) {
-    callbackUrl = `/sell?${params}`;
-  } else if (params) {
-    callbackUrl = `/buy?${params}`;
-  }
+  // Always redirect back to /menu after login so server-side verification check can run
+  const callbackUrl = params ? `/menu?${params}` : "/menu";
 
   const loginUrl = `/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 

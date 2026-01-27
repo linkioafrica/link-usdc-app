@@ -15,15 +15,29 @@ export default async function Menu({
   const session = await auth();
   const params = await searchParams;
 
-  // Auto-redirect logged-in users based on type param
+  // Auto-redirect logged-in users based on type param and verification status
   if (session?.user?.id && params.type) {
     const queryString = new URLSearchParams(
       params as Record<string, string>
     ).toString();
+
+    // Check if user is verified (both verified flag AND customerId required)
+    const isVerified = session.user.verified && session.user.customerId;
+
     if (params.type === "deposit") {
-      redirect(`/buy?${queryString}`);
+      if (isVerified) {
+        redirect(`/buy?${queryString}`);
+      } else {
+        // Send to KYC first, then return to buy flow
+        redirect(`/buy/id?${queryString}&returnTo=buy`);
+      }
     } else if (params.type === "withdraw") {
-      redirect(`/sell?${queryString}`);
+      if (isVerified) {
+        redirect(`/sell?${queryString}`);
+      } else {
+        // Send to KYC first, then return to sell flow
+        redirect(`/buy/id?${queryString}&returnTo=sell`);
+      }
     }
   }
 

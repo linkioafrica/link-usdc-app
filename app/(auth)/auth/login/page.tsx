@@ -23,7 +23,7 @@ export default async function Login({
           <Image src="/logo.png" alt="logo" width={150} height={150} />
         </div>
         <p className="text-xs text-center">
-          Log in to your account to buy or sell stables.
+          Log in to your account.
         </p>
       </div>
 

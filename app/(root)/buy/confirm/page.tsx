@@ -1,10 +1,7 @@
 import { Navbar } from "@/components/Navbar";
 import { ConfirmForm } from "../_components/confirmMain";
-import { auth } from "@/auth";
 
 export default async function Confirm() {
-  const session = await auth();
-
   return (
     <main>
       <Navbar route="/buy" title="Confirm" />
@@ -16,7 +13,7 @@ export default async function Confirm() {
         </p>
       </div>
 
-      <ConfirmForm hasKYC={session?.user?.hasKyc as boolean} />
+      <ConfirmForm />
     </main>
   );
 }

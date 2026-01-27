@@ -10,7 +10,7 @@ import { useEffect, useState, useTransition } from "react";
 import Image from "next/image";
 import { FormError, FormSuccess } from "@/components/FormStatus";
 
-export const ConfirmForm = ({ hasKYC }: { hasKYC: boolean }) => {
+export const ConfirmForm = () => {
   const [feedback, setFeedback] = useState(false);
 
   const [error, setError] = useState<string | undefined>("");
@@ -61,8 +61,8 @@ export const ConfirmForm = ({ hasKYC }: { hasKYC: boolean }) => {
 
     if (request?.valid === true) {
       handleFeedback("success", request.message);
-      if (hasKYC) return router.push("/buy/payment");
-      return router.push("/buy/id");
+      // KYC check is now done at menu level, always proceed to payment
+      return router.push("/buy/payment");
     } else {
       return handleFeedback("error", request.message);
     }
