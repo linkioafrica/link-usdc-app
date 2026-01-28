@@ -64,20 +64,50 @@
 
 export const fiatOptions = [
   {
-    value: "brl",
-    label: "BRL",
-    img: "/assets/svg/fiat/brl.svg",
-  },
-  {
     value: "ngn",
     label: "NGN",
     img: "/assets/svg/fiat/ngn.svg",
   },
-  // {
-  //   value: "usd",
-  //   label: "USD",
-  //   img: "/assets/svg/fiat/usd.svg",
-  // },
+  {
+    value: "ghs",
+    label: "GHS",
+    img: "/assets/svg/fiat/ghs.svg",
+  },
+  {
+    value: "kes",
+    label: "KES",
+    img: "/assets/svg/fiat/kes.svg",
+  },
+  {
+    value: "mwk",
+    label: "MWK",
+    img: "/assets/svg/fiat/mwk.svg",
+  },
+  {
+    value: "sle",
+    label: "SLE",
+    img: "/assets/svg/fiat/sle.svg",
+  },
+  {
+    value: "ugx",
+    label: "UGX",
+    img: "/assets/svg/fiat/ugx.svg",
+  },
+  {
+    value: "zar",
+    label: "ZAR",
+    img: "/assets/svg/fiat/zar.svg",
+  },
+  {
+    value: "zmw",
+    label: "ZMW",
+    img: "/assets/svg/fiat/zmw.svg",
+  },
+  {
+    value: "xaf",
+    label: "XAF",
+    img: "/assets/svg/fiat/xaf.svg",
+  },
 ];
 
 export const stablesOptions = [

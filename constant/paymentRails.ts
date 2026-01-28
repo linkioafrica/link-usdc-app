@@ -1,0 +1,93 @@
+export const PaymentRails = [
+  {
+    currency: "GHS",
+    country: "Ghana",
+    paymentMethods: [
+      { method: "MTN Mobile Money", value: "mtn_momo_gh" },
+      { method: "Vodafone Cash", value: "vodafone_cash_gh" },
+      { method: "Bank Account (Instant Pay)", value: "bank_transfer_gh" },
+    ],
+  },
+  {
+    currency: "KES",
+    country: "Kenya",
+    paymentMethods: [
+      { method: "M-Pesa", value: "mpesa" },
+      { method: "Bank Transfer", value: "bank_transfer_kenya" },
+      { method: "Airtel Money", value: "airtel_money" },
+    ],
+  },
+  {
+    currency: "MWK",
+    country: "Malawi",
+    paymentMethods: [
+      { method: "Airtel Money", value: "airtel_money" },
+      { method: "Bank Transfer", value: "bank_transfer_mw" },
+    ],
+  },
+  {
+    currency: "NGN",
+    country: "Nigeria",
+    paymentMethods: [{ method: "Bank Account", value: "bank_transfer_ng" }],
+  },
+  {
+    currency: "SLE",
+    country: "Sierra Leone",
+    paymentMethods: [
+      { method: "Orange Money", value: "orange_money" },
+      { method: "Afrimoney", value: "afrimoney" },
+    ],
+  },
+  {
+    currency: "XAF",
+    country: "Cameroon",
+    paymentMethods: [
+      { method: "MTN Mobile Money", value: "mtn_momo" },
+      { method: "Orange Money", value: "orange_money" },
+      { method: "Afriland Bank", value: "afriland" },
+    ],
+  },
+  {
+    currency: "UGX",
+    country: "Uganda",
+    paymentMethods: [
+      { method: "MTN Mobile Money", value: "mtn_momo_ug" },
+      { method: "Airtel Money", value: "airtel_money_ug" },
+    ],
+  },
+  {
+    currency: "ZAR",
+    country: "South Africa",
+    paymentMethods: [
+      { method: "FNB", value: "fnb" },
+      { method: "Bank Transfer", value: "bank_transfer" },
+    ],
+  },
+  {
+    currency: "TZS",
+    country: "Tanzania",
+    paymentMethods: [
+      { method: "TigoPesa", value: "tigopesa" },
+      { method: "Airtel Money", value: "airtel_money" },
+      { method: "Vodacom", value: "vodacom" },
+      { method: "Bank Transfer", value: "bank_transfer_tz" },
+    ],
+  },
+  {
+    currency: "ZMW",
+    country: "Zambia",
+    paymentMethods: [
+      { method: "Airtel Money", value: "airtel_money_zm" },
+      { method: "MTN Mobile Money", value: "mtn_momo_zm" },
+      { method: "Bank Transfer", value: "bank_transfer_zm" },
+    ],
+  },
+];
+
+// Helper to get payment methods by currency
+export const getPaymentMethodsByCurrency = (currency: string) => {
+  const rail = PaymentRails.find(
+    (r) => r.currency.toUpperCase() === currency.toUpperCase()
+  );
+  return rail?.paymentMethods || [];
+};
