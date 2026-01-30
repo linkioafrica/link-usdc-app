@@ -4,7 +4,7 @@ import { ConfirmForm } from "../_components/confirmMain";
 export default async function Confirm() {
   return (
     <main>
-      <Navbar route="/buy" title="Confirm" />
+      <Navbar route="/buy" title="Confirm Details" />
       <div className="bg-p-light p-2 rounded-md flex space-x-1">
         <span className="material-icons-round block text-primary">info</span>
         <p className="text-primary text-[9px]">

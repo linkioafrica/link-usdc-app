@@ -5,341 +5,205 @@ import { useBuyContext } from "@/contexts/buy.context";
 import { useRampContext } from "@/contexts/ramp.context";
 import { useRouter } from "next/navigation";
 import { CopyButton } from "@/components/CopyButton";
-import Link from "next/link";
-import { useQRCode } from "next-qrcode";
-import { AllVendorBankList } from "@/constant/constant";
-// import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
+import { confirmDepositAction } from "@/actions/quote.actions";
+import { useState } from "react";
 import Image from "next/image";
+
+interface VendorInfo {
+  account_name?: string;
+  bank_name?: string;
+  account_number?: string;
+  phone_number?: string;
+}
 
 export const MakePayment = () => {
   const { buyData } = useBuyContext();
   const { rampData } = useRampContext();
-  const navigate = useRouter();
-  const { Canvas } = useQRCode();
+  const router = useRouter();
 
-  const handleContinue = () => {
-    navigate.push("/buy/pop");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // console.log("Buydata", buyData);
+  // console.log("vendor_details raw:", buyData.vendor_details);
+
+  // Parse vendor_details from context
+  // Formats:
+  // Mobile money (2 lines): "0549468390\nGLACES VENTURES / Gloria Glago"
+  // Bank transfer (3 lines): "1234567890\nAccount Name\nBank Name"
+  // Or JSON format: { account_name, bank_name, account_number, phone_number }
+  const vendorInfo: VendorInfo | null = buyData.vendor_details
+    ? (() => {
+        // First try to parse as JSON
+        try {
+          const parsed = JSON.parse(buyData.vendor_details);
+          if (typeof parsed === 'object') {
+            return {
+              account_name: parsed.account_name,
+              bank_name: parsed.bank_name,
+              account_number: parsed.account_number,
+              phone_number: parsed.phone_number,
+            };
+          }
+        } catch {
+          // Not JSON, parse as newline-separated string
+        }
+
+        // Parse as newline-separated string
+        const lines = buyData.vendor_details.split('\n').map(line => line.trim()).filter(Boolean);
+        if (lines.length >= 2) {
+          // First line is always phone/account number
+          // Second line is account name
+          // Third line (if exists) is bank name
+          return {
+            phone_number: lines[0],
+            account_name: lines[1],
+            bank_name: lines[2] || undefined,
+          };
+        } else if (lines.length === 1) {
+          // Single line - just phone number
+          return {
+            phone_number: lines[0],
+          };
+        }
+        return null;
+      })()
+    : null;
+
+  console.log("Parsed vendorInfo:", vendorInfo);
+
+  // Determine if bank transfer or mobile money (bank transfer has bank_name)
+  const isBankTransfer = Boolean(vendorInfo?.bank_name);
+
+  // Format amount with commas
+  const formattedAmount = rampData?.send_amount?.toLocaleString() || "0";
+
+  const handlePaymentMade = async () => {
+    setLoading(true);
+    setError(null);
+
+    const result = await confirmDepositAction({
+      wallet_address: buyData.wallet_address,
+      network: buyData.network,
+      memo: buyData.stellar_memo || undefined,
+      ticket_id: buyData.ticket_id || buyData.transaction_id || "",
+    });
+    // console.log("Confirm deposit result", result);
+
+    if (result.status === 200) {
+      router.push("/buy/status/success");
+    } else {
+      setError(result.message || "Failed to confirm deposit");
+      setLoading(false);
+    }
   };
 
-  let selectedRampAsset = rampData?.send_asset.toUpperCase();
-
   return (
-    <section>
-      <Navbar route="/buy/confirm" title="Make Your Payment" />
+    <section className="flex flex-col min-h-screen">
+      <Navbar route="/buy/confirm" title="Make Payment" />
 
-      <div className="space-y-2">
-        {selectedRampAsset === "USD" && (
-          <div className="bg-p-light p-2 rounded-md items-center flex space-x-1">
-            <span className="material-icons-round block text-primary">
-              info
-            </span>
-            <p className="text-primary text-xs">
-              Transfer via Wire or ACH Transfer
-            </p>
-          </div>
-        )}
+      <div className="flex-1 space-y-4">
+        {/* Info banner */}
+        <div className="bg-amber-50 p-2 rounded-lg flex items-start space-x-2">
+          <span className="material-icons-round text-amber-600 text-xl">
+            info
+          </span>
+          <p className="text-amber-700 text-xs">
+           Ensure your request is processed by adding the REFERENCE CODE below to your transfer.
+          </p>
+        </div>
 
-        {selectedRampAsset === "CAD" && (
-          <>
-            <div className="bg-p-light p-2 rounded-md flex">
-              <span className="material-icons-round block text-primary">
-                info
-              </span>
-              <p className="text-primary text-[9px]">
-                This transaction is powered by our trusted third-party banking
-                partner.
-              </p>
-            </div>
-          </>
-        )}
-        <div className="flex shadow rounded-lg p-2 items-center justify-center">
-          <div className="text-center">
-            <p className="text-xs">Amount to send</p>
+        {/* Amount to send */}
+        <div className="bg-slate-50 rounded-lg px-4 py-2 text-center">
+          <p className="text-sm text-slate-500 mb-1">Amount to send</p>
+          <div className="flex items-center justify-center space-x-2">
             <h2 className="font-bold text-2xl">
-              {rampData?.send_asset.toUpperCase()} {rampData.send_amount}
+              {formattedAmount} {rampData?.send_asset?.toUpperCase()}
             </h2>
-            <p className="text-xs">
-              (Merchant fee of {rampData?.merchant_fee}% included){" "}
-            </p>
+            <CopyButton value={String(rampData?.send_amount)} />
           </div>
-          <CopyButton value={String(rampData?.send_amount)} />
         </div>
-        <div className="bg-p-light p-2 rounded-md flex items-center justify-between">
-          {/* <p className="text-primary">
-            Deposit time <span className="font-semibold">15:00</span>
-          </p>{" "} */}
-          <p className="text-primary">Contact us:</p>
-          <div className="flex items-center justify-center gap-2">
-            <Link
-              href="https://api.whatsapp.com/send/?phone=16893033761&text&type=phone_number&app_absent=0"
-              passHref={true}
-              target="_blank"
-              className="inline-block"
-            >
-              <button className="bg-primary flex items-center justify-center text-white rounded-full w-7 h-7">
-                <span className="material-icons text-lg">sms</span>
-              </button>
-            </Link>
-            <Link
-              href="https://call.whatsapp.com/voice/x6n2yjS4MvaErkKSRSBHBc"
-              passHref={true}
-              target="_blank"
-              className="inline-block"
-            >
-              <button className="bg-primary flex items-center justify-center text-white rounded-full w-7 h-7">
-                <span className="material-icons text-lg">call</span>
-              </button>
-            </Link>
-          </div>{" "}
+
+        {/* Payment method header */}
+        <div className="border-b-2 border-primary pb-2 flex items-center space-x-2">
+          <span className="material-icons text-primary">account_balance</span>
+          <p className="text-primary font-medium">
+            {isBankTransfer ? "Bank transfer" : "Mobile money"}
+          </p>
         </div>
-        {/* Cad payment method */}
-        {selectedRampAsset === "CAD" && (
-          <>
-            <p className="text-md text-slate-900 my-3">Interac Payment</p>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Reference code:</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton value={String(rampData.reference)} className="" />
-                <span>{rampData.reference}</span>
-              </p>
-            </div>
 
-            <div className="bg-p-light p-2 rounded-md flex">
-              <span className="material-icons-round block text-primary">
-                info
-              </span>
-              <p className="text-primary text-[9px]">
-                Remember to copy or write down the reference code above. It will
-                be needed to process your transaction.
+        {/* Vendor details - clean block format */}
+        <div className="space-y-3 py-2">
+          {/* Vendor name */}
+          {vendorInfo?.account_name && (
+            <p className="font-semibold text-lg">{vendorInfo.account_name}</p>
+          )}
+
+          {/* Bank name (if applicable) */}
+          {vendorInfo?.bank_name && (
+            <p className="text-slate-700">{vendorInfo.bank_name}</p>
+          )}
+
+          {/* Account number or phone number with copy */}
+          {vendorInfo?.account_number && (
+            <div className="flex items-center space-x-2">
+              <CopyButton value={vendorInfo.account_number} />
+              <p className="font-medium">{vendorInfo.account_number}</p>
+            </div>
+          )}
+
+          {vendorInfo?.phone_number && (
+            <div className="flex items-center space-x-2">
+              <CopyButton value={vendorInfo.phone_number} />
+              <p className="font-medium">{vendorInfo.phone_number}</p>
+            </div>
+          )}
+
+          {/* Reference code */}
+          {rampData?.reference && (
+            <div className="flex items-center space-x-2">
+              <CopyButton value={String(rampData.reference)} />
+              <p className="font-medium">
+                {rampData.reference}{" "}
+                <span className="text-slate-500">(reference code)</span>
               </p>
             </div>
-          </>
+          )}
+        </div>
+
+        {/* Error message */}
+        {error && (
+          <div className="text-rose-600 text-sm text-center bg-rose-50 p-2 rounded">
+            {error}
+          </div>
         )}
 
-        {(selectedRampAsset === "EUR" || selectedRampAsset === "GBP") && (
-          <>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Bank</p>
-              <p className="font-medium">{buyData?.ven_bank_name}</p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Account name</p>
-              <p className="font-medium text-right">
-                {buyData?.ven_account_name}
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Account number</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton
-                  value={String(buyData?.ven_account_number)}
-                  className=""
-                />
-                <span>{buyData?.ven_account_number}</span>
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Sort code</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton
-                  value={String(buyData?.ven_sort_code)}
-                  className=""
-                />
-                <span>{buyData?.ven_sort_code}</span>
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Reference code</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton value={String(rampData.reference)} className="" />
-                <span>{rampData.reference}</span>
-              </p>
-            </div>
-          </>
-        )}
+        {/* Bottom section */}
+        <div className="mt-auto space-y-4 pb-4">
+          {/* Submit button */}
+          <button
+            type="button"
+            onClick={handlePaymentMade}
+            disabled={loading}
+            className="bg-primary text-base text-white flex items-center justify-center p-3 w-full rounded-md disabled:opacity-50"
+          >
+            {loading ? (
+              <Image
+                src="/assets/progress_activity.svg"
+                alt="loading"
+                className="animate-spin"
+                width={24}
+                height={24}
+              />
+            ) : (
+              "I have paid, Continue"
+            )}
+          </button>
+        </div>
 
-        {(selectedRampAsset == "AUD" ||
-          selectedRampAsset === "JPY" ||
-          selectedRampAsset == "KES" ||
-          selectedRampAsset == "NZD" ||
-          selectedRampAsset == "SGD" ||
-          selectedRampAsset == "ZAR" ||
-          selectedRampAsset === "TRY") && (
-          <>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Bank</p>
-              <p className="font-medium">{buyData?.ven_bank_name}</p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Account name</p>
-              <p className="font-medium text-right">
-                {buyData?.ven_account_name}
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Account number</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton
-                  value={String(buyData?.ven_account_number)}
-                  className=""
-                />
-                <span>{buyData?.ven_account_number}</span>
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Swift code</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton
-                  value={String(buyData?.ven_swift_code)}
-                  className=""
-                />
-                <span>{buyData?.ven_swift_code}</span>
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Reference code</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton value={String(rampData.reference)} className="" />
-                <span>{rampData.reference}</span>
-              </p>
-            </div>
-          </>
-        )}
 
-        {/* Ngn payment method */}
-        {selectedRampAsset === "NGN" && (
-          <>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Bank</p>
-              <p className="font-medium">{buyData?.ven_bank_name}</p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Account name</p>
-              <p className="font-medium text-right">
-                {buyData?.ven_account_name}
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Account number</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton
-                  value={String(buyData?.ven_account_number)}
-                  className=""
-                />
-                <span>{buyData?.ven_account_number}</span>
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Reference code</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton value={String(rampData.reference)} className="" />
-                <span>{rampData.reference}</span>
-              </p>
-            </div>
-          </>
-        )}
-
-        {/* Usd payment method */}
-        {selectedRampAsset === "USD" && (
-          <>
-            <div className="flex items-center justify-between pt-2">
-              <p className="text-slate-500">Bank:</p>
-              <p className="font-medium">{buyData?.ven_bank_name}</p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Account name:</p>
-              <p className="font-medium ">{buyData?.ven_account_name}</p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Account number:</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton
-                  value={String(buyData?.ven_account_number)}
-                  className=""
-                />
-                <span>{buyData?.ven_account_number}</span>
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Routing number:</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton
-                  value={String(buyData?.ven_routing_number)}
-                  className=""
-                />
-                <span>{buyData?.ven_routing_number}</span>
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Account type:</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton
-                  value={String(buyData?.ven_account_type)}
-                  className=""
-                />
-                <span>{buyData?.ven_account_type}</span>
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Reference code:</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton value={String(rampData.reference)} className="" />
-                <span>{rampData.reference}</span>
-              </p>
-            </div>
-          </>
-        )}
-
-        {/* Brl payment method */}
-        {selectedRampAsset === "BRL" && (
-          <>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-500">Ref code:</p>
-              <p className="font-medium flex items-center space-x-1">
-                <CopyButton value={String(rampData.reference)} className="" />
-                <span>{rampData.reference}</span>
-              </p>
-            </div>
-            <div>
-              <div className="flex items-center justify-between">
-                <p className="text-slate-500">Pix key:</p>
-                <p className="font-medium flex items-center space-x-1 text-sm">
-                  <CopyButton
-                    value={"11754090-d0cf-4b1b-9d45-6669b695f5f3" as string}
-                    className=""
-                  />
-                  <span>
-                    11754090-d0cf-4b1b-
-                    <br />
-                    9d45-6669b695f5f3
-                  </span>
-                </p>
-              </div>
-
-              <div className="mx-auto w-max mt-5">
-                <Canvas
-                  text={"11754090-d0cf-4b1b-9d45-6669b695f5f3"}
-                  options={{
-                    margin: 2,
-                    scale: 5,
-                    width: 110,
-                  }}
-                />
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      <div className="my-5">
-        <button
-          type="button"
-          onClick={handleContinue}
-          className="bg-primary text-base text-white flex items-center justify-center p-2 btn_position rounded-md"
-        >
-          {/* I&apos;ve made payment */}
-          Payment made
-        </button>
+        {/* Powered by LINK
+        <p className="text-center text-slate-400 text-sm">Powered by LINK</p> */}
       </div>
     </section>
   );

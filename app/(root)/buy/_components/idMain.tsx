@@ -43,6 +43,8 @@ export const IDMain = ({
 
   const navigate = useRouter();
 
+  // console.log("Current", route, hasKyc, verified, customerId, userName, userIdNumber, userIdType);
+
   // Determine which case we're in
   const isFullyVerified = hasKyc && verified && customerId;
   const needsKyc = !hasKyc;
@@ -89,10 +91,17 @@ export const IDMain = ({
 
     await verifyCustomerAction({ name: submittedName })
       .then(async (data) => {
-        if (data.status === 400) return setError(data?.message);
+        if (data.status === "Failed") return setError(data?.message);
 
         setSuccess(data?.message || "Verification successful!");
-        return navigate.push(route ? route : "/buy");
+
+        // Refresh to get updated session data (triggers JWT callback)
+        navigate.refresh();
+
+        // Small delay to allow session refresh, then redirect
+        setTimeout(() => {
+          navigate.push(route ? route : "/buy");
+        }, 100);
       })
       .catch(() => {
         setError("Something went wrong");

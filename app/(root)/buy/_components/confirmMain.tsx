@@ -22,7 +22,7 @@ export const ConfirmForm = () => {
   const { rampData } = useRampContext();
   const router = useRouter();
 
-  console.log(buyData);
+  // console.log("Buydata", buyData);
   const findNetwork = networkOptions.find(
     (item) => item.label === buyData?.network
   );
@@ -57,7 +57,6 @@ export const ConfirmForm = () => {
       chain: findNetwork?.value as string,
       value: event?.get("wallet_address") as string,
     });
-    console.log(request);
 
     if (request?.valid === true) {
       handleFeedback("success", request.message);
@@ -109,18 +108,19 @@ export const ConfirmForm = () => {
             type="text"
             name="wallet_address"
             disabled={buyData?.network === "" ? true : false}
+            readOnly={Boolean(buyData?.user_wallet)}
+            defaultValue={buyData?.user_wallet || ""}
             required
             className="outline-none bg-slate-100 py-5 rounded-md border-none text-base"
           />
         </div>
         {findNetwork?.label === "Stellar" ? (
           <div>
-            <label htmlFor="wallet_address" className="text-sm text-slate-500">
-              Stellar Memo
+            <label htmlFor="stellar_memo" className="text-sm text-slate-500">
+              Stellar Memo <span className="text-slate-400">(optional)</span>
             </label>
             <Input
               type="text"
-              required
               name="stellar_memo"
               className="outline-none bg-slate-100 py-5 rounded-md border-none text-base"
             />
