@@ -6,7 +6,7 @@
 @tailwind utilities;
 
 body {
-  @apply bg-black h-screen;
+  @apply bg-black h-screen overflow-hidden;
 }
 
 .container {
@@ -14,7 +14,7 @@ body {
 }
 
 .aspect-ratio {
-  @apply relative bg-white shadow-lg rounded-3xl w-full h-[530px] py-5 px-6;
+  @apply relative bg-white shadow-lg rounded-3xl w-full h-[560px] py-5 px-6;
 }
 
 .btn_position {

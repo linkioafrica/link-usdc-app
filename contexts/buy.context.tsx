@@ -7,19 +7,32 @@ type BuyContextType = {
 };
 
 type BuyProps = {
+  // User crypto destination
   wallet_address: string;
   stellar_memo: string;
   network: string;
-  ven_bank_name?: string;
-  ven_account_number?: string;
-  ven_account_name?: string;
-  ven_account_type?: string;
-  ven_routing_number?: string;
-  ven_iban?: string;
-  ven_institution_number?: string;
-  ven_sort_code?: string;
-  ven_branch_code?: string;
-  ven_swift_code?: string;
+
+  // Quote info
+  quote_id: string;
+  ticket_id?: string;
+
+  // Sender identifier (user-provided bank account or phone number)
+  payment_method: string;
+  sender_identifier: string;
+
+  // Vendor payout details (from backend response)
+  agent?: string;
+  vendor_details?: string;
+  expires_at?: string;
+
+  // URL params (from external integrations)
+  transaction_type?: string;
+  asset_code?: string;
+  transaction_id?: string;
+
+  // SEP-24 params (from URL, persisted in context)
+  token?: string;
+  user_wallet?: string; // Pre-filled wallet from URL
 };
 
 type BuyContextProp = {
@@ -34,16 +47,18 @@ export default function BuyContextProvider({ children }: BuyContextType) {
     wallet_address: "",
     stellar_memo: "",
     network: "",
-    ven_bank_name: "",
-    ven_account_number: "",
-    ven_account_name: "",
-    ven_account_type: "",
-    ven_routing_number: "",
-    ven_iban: "",
-    ven_institution_number: "",
-    ven_sort_code: "",
-    ven_branch_code: "",
-    ven_swift_code: "",
+    quote_id: "",
+    ticket_id: "",
+    payment_method: "",
+    sender_identifier: "",
+    agent: "",
+    vendor_details: "",
+    expires_at: "",
+    transaction_type: "",
+    asset_code: "",
+    transaction_id: "",
+    token: "",
+    user_wallet: "",
   });
 
   return (

@@ -5,6 +5,7 @@ import { getUserByEmail, resend2FA, sendKYC } from "@/lib/user";
 import { DEFAULT_LOGIC_REDIRECT } from "@/routes";
 import { server } from "@/www";
 import { AuthError } from "next-auth";
+import { revalidatePath } from "next/cache";
 
 export const loginActions = async (email: string) => {
   const existingUser = await getUserByEmail(email);
@@ -182,22 +183,28 @@ export const accNumberValidate = async ({
   }
 };
 
-// Case B: Customer verification/creation action (placeholder endpoint)
-// TODO: Update endpoint when backend is ready
+// Case B: Customer verification/creation action
 export const verifyCustomerAction = async ({ name }: { name: string }) => {
   const session = await auth();
 
   try {
-    const response = await fetch(`${server}/onchain/verify-customer`, {
+    const response = await fetch(`${server}/account/verify-customer`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        customer_id: session?.user?.id,
+        user_id: session?.user?.id,
         name: name,
+        email: session?.user?.email,
       }),
     });
+    const result = await response.json();
 
-    return await response.json();
+    // Revalidate paths to clear cache so session data refreshes
+    revalidatePath("/buy/id");
+    revalidatePath("/buy");
+    revalidatePath("/sell");
+
+    return result;
   } catch (error: any) {
     return { status: 400, message: error?.message || "Something went wrong" };
   }

@@ -5,7 +5,7 @@ export const PaymentRails = [
     paymentMethods: [
       { method: "MTN Mobile Money", value: "mtn_momo_gh" },
       { method: "Vodafone Cash", value: "vodafone_cash_gh" },
-      { method: "Bank Account (Instant Pay)", value: "bank_transfer_gh" },
+      { method: "Bank Transfer (Instant Pay)", value: "bank_transfer_gh" },
     ],
   },
   {
@@ -28,7 +28,7 @@ export const PaymentRails = [
   {
     currency: "NGN",
     country: "Nigeria",
-    paymentMethods: [{ method: "Bank Account", value: "bank_transfer_ng" }],
+    paymentMethods: [{ method: "Bank Transfer", value: "bank_transfer_ng" }],
   },
   {
     currency: "SLE",
