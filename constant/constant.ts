@@ -581,26 +581,26 @@ export const AllCurrencySellFees = [
 ];
 
 export const AllCurrencyLimits = [
-  {
-    currency: "BRL",
-    limit: [
-      {
-        minimum: 100,
-        maximumBuy: 250000,
-        maximumSell: 500000,
-      },
-    ],
-  },
-  {
-    currency: "IDR",
-    limit: [
-      {
-        minimum: 300000,
-        maximumBuy: 80000000,
-        maximumSell: 14000,
-      },
-    ],
-  },
+  // {
+  //   currency: "BRL",
+  //   limit: [
+  //     {
+  //       minimum: 100,
+  //       maximumBuy: 250000,
+  //       maximumSell: 500000,
+  //     },
+  //   ],
+  // },
+  // {
+  //   currency: "IDR",
+  //   limit: [
+  //     {
+  //       minimum: 300000,
+  //       maximumBuy: 80000000,
+  //       maximumSell: 14000,
+  //     },
+  //   ],
+  // },
   {
     currency: "NGN",
     limit: [

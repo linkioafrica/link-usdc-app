@@ -3,11 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-// const menuItems = [
-//   { name: "Buy Stables", href: "/buy" },
-//   { name: "Sell Stables", href: "/sell/options" },
-// ];
-
 export const Navbar = ({
   route,
   title,
@@ -18,6 +13,35 @@ export const Navbar = ({
   const path = usePathname();
   const navigate = useRouter();
 
+  // If route and title are provided, show centered title with back arrow
+  if (route && title) {
+    return (
+      <nav className="relative flex items-center justify-between mb-3">
+        {/* Back arrow */}
+        <button
+          onClick={() => navigate.push(route)}
+          className="bg-p-light text-primary flex items-center justify-center rounded-full p-1.5"
+        >
+          <span className="material-icons-round">arrow_back</span>
+        </button>
+
+        {/* Centered title */}
+        <p className="font-medium text-lg absolute left-1/2 transform -translate-x-1/2">
+          {title}
+        </p>
+
+        {/* Menu button */}
+        <Link
+          href="/menu"
+          className="bg-p-light text-primary flex items-center justify-center rounded-full p-1.5"
+        >
+          <span className="material-icons-round">menu</span>
+        </Link>
+      </nav>
+    );
+  }
+
+  // Default navbar for main pages (Buy/Sell)
   return (
     <nav className="relative flex items-center justify-between gap-5 mb-3">
       {(path === "/buy" || path === "/buy/confirm" || path === "/buy/pop") && (
@@ -44,11 +68,8 @@ export const Navbar = ({
           </Link>
         </div>
       )}
-      {!(path === "/buy" || path === "/buy/confirm" || path === "/buy/pop" || path === "/sell" || path === "/sell/confirm" || path === "/sell/pop") && (
-        <></>
-      )}
 
-      {title && <p className="font-medium text-lg">{title}</p>}
+      {title && !route && <p className="font-medium text-lg">{title}</p>}
 
       <Link
         href="/menu"

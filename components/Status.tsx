@@ -37,35 +37,3 @@ export const StatusSuccess = ({ title, desc, route }: StatusProps) => {
     </section>
   );
 };
-
-export const StatusMaintenance = () => {
-  return (
-    <section className="grid gap-y-10">
-      <div className="flex items-center justify-center mt-10">
-        <Image
-          src="/assets/engineering.svg"
-          width={150}
-          height={150}
-          alt="success"
-        />
-      </div>
-
-      <div className="text-center space-y-5">
-        <h1 className="font-bold text-2xl">Maintenance</h1>
-        <p className="text-xs text-slate-500">
-          Link is going through a maintenance routine. BUY NGNC is on hold,
-          while SELL NGNC is still active
-        </p>
-      </div>
-
-      <div className="my-10">
-        <Link
-          href="/sell"
-          className="bg-blue-700 text-base text-white flex items-center justify-center p-2 btn_position rounded-md"
-        >
-          Go to Sell Stables
-        </Link>
-      </div>
-    </section>
-  );
-};
