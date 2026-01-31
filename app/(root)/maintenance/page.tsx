@@ -1,9 +1,9 @@
-import { StatusMaintenance } from "@/components/Status";
+// import { StatusMaintenance } from "@/components/Status";
 
 export default async function Maintenance() {
   return (
     <main>
-      <StatusMaintenance />
+      {/* <StatusMaintenance /> */}
     </main>
   );
 }
