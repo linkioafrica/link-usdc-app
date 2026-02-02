@@ -18,25 +18,9 @@ export const PaymentRails = [
     ],
   },
   {
-    currency: "MWK",
-    country: "Malawi",
-    paymentMethods: [
-      { method: "Airtel Money", value: "airtel_money" },
-      { method: "Bank Transfer", value: "bank_transfer_mw" },
-    ],
-  },
-  {
     currency: "NGN",
     country: "Nigeria",
     paymentMethods: [{ method: "Bank Transfer", value: "bank_transfer_ng" }],
-  },
-  {
-    currency: "SLE",
-    country: "Sierra Leone",
-    paymentMethods: [
-      { method: "Orange Money", value: "orange_money" },
-      { method: "Afrimoney", value: "afrimoney" },
-    ],
   },
   {
     currency: "XAF",
@@ -48,19 +32,10 @@ export const PaymentRails = [
     ],
   },
   {
-    currency: "UGX",
-    country: "Uganda",
-    paymentMethods: [
-      { method: "MTN Mobile Money", value: "mtn_momo_ug" },
-      { method: "Airtel Money", value: "airtel_money_ug" },
-    ],
-  },
-  {
     currency: "ZAR",
     country: "South Africa",
     paymentMethods: [
       { method: "FNB", value: "fnb" },
-      { method: "Bank Transfer", value: "bank_transfer" },
     ],
   },
   {
@@ -70,7 +45,30 @@ export const PaymentRails = [
       { method: "TigoPesa", value: "tigopesa" },
       { method: "Airtel Money", value: "airtel_money" },
       { method: "Vodacom", value: "vodacom" },
-      { method: "Bank Transfer", value: "bank_transfer_tz" },
+    ],
+  },
+  {
+    currency: "SLE",
+    country: "Sierra Leone",
+    paymentMethods: [
+      { method: "Orange Money", value: "orange_money" },
+      { method: "Afrimoney", value: "afrimoney" },
+    ],
+  },
+  {
+    currency: "MWK",
+    country: "Malawi",
+    paymentMethods: [
+      { method: "Airtel Money", value: "airtel_money" },
+      { method: "Bank Transfer", value: "bank_transfer_mw" },
+    ],
+  },
+  {
+    currency: "UGX",
+    country: "Uganda",
+    paymentMethods: [
+      { method: "MTN Mobile Money", value: "mtn_momo_ug" },
+      { method: "Airtel Money", value: "airtel_money_ug" },
     ],
   },
   {
