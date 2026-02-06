@@ -20,7 +20,7 @@ interface BuyActionsProps {
     pop_bank_name?: string;
     pop_account_name?: string;
     pop_account_number?: string;
-    reference?: number;
+    reference?: string;
     pix_key?: string;
     interac?: string;
     business_id: string;
@@ -40,7 +40,7 @@ interface SellActionsProps {
     bank_name?: string;
     account_number?: string;
     account_name?: string;
-    reference?: number;
+    reference?: string;
     wallet_address?: string;
     network?: string;
     routing_number?: string;
