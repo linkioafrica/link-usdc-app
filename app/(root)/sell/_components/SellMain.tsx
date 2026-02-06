@@ -164,7 +164,7 @@ export const SellMain = ({ session_email }: { session_email: string }) => {
       business_tid: businessTidParam as string,
       merchant_fee: fees,
       rate: String(rate),
-      reference: reference,
+      reference: reference.toString(),
     });
     setSellData({
       ...sellData,
