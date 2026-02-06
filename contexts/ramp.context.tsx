@@ -17,7 +17,7 @@ type RampProps = {
   business_tid: string;
   order_id: string;
   merchant_fee: number;
-  reference?: number;
+  reference?: string;
 };
 
 type RampContextProp = {
@@ -39,7 +39,7 @@ export default function RampContextProvider({ children }: RampContextType) {
     payment_type: "",
     order_id: "",
     merchant_fee: 0,
-    reference: 0,
+    reference: "",
   });
 
   return (

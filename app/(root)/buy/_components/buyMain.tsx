@@ -12,7 +12,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRampContext } from "@/contexts/ramp.context";
 import { useBuyContext } from "@/contexts/buy.context";
-import { requestQuoteAction, confirmOnrampAction } from "@/actions/quote.actions";
+import { requestQuoteAction, confirmQuoteAction } from "@/actions/quote.actions";
 import { Input } from "@/components/ui/input";
 import {
   Listbox,
@@ -57,7 +57,21 @@ export const BuyMain = ({ session_email }: { session_email: string }) => {
     (option) => option?.value === receiveAsset.value
   );
 
-  const reference = Math?.floor(Math?.random() * 10000000000);
+  const generateReference = () => {
+  const letters = 'abcdefghijklmnopqrstuvwxyz';
+  const prefix = letters.charAt(Math.floor(Math.random() * 26)) +
+                 letters.charAt(Math.floor(Math.random() * 26)) +
+                 letters.charAt(Math.floor(Math.random() * 26));
+  const num1 = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+  const num2 = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+  const suffix = letters.charAt(Math.floor(Math.random() * 26)) +
+                 letters.charAt(Math.floor(Math.random() * 26)) +
+                 letters.charAt(Math.floor(Math.random() * 26));
+  return `${prefix}-${num1}-${num2}-${suffix}`;
+};
+
+  const ref_id = generateReference();
+  const reference = ref_id.toString();
 
   // Get payment methods for selected currency
   const paymentMethods = getPaymentMethodsByCurrency(sendAsset?.value);
@@ -88,7 +102,7 @@ export const BuyMain = ({ session_email }: { session_email: string }) => {
         asset_code: assetCode || prev.asset_code || "",
         transaction_id: transactionId || prev.transaction_id || "",
         token: token || prev.token || "",
-        user_wallet: wallet || prev.user_wallet || "",
+        wallet_address: wallet || prev.wallet_address || "",
       }));
     }
   }, [searchParams, setBuyData]);
@@ -186,9 +200,10 @@ export const BuyMain = ({ session_email }: { session_email: string }) => {
     setError(null);
 
     // Call confirm onramp endpoint
-    const result = await confirmOnrampAction({
+    const result = await confirmQuoteAction({
       quote_id: quoteId,
       send_asset: sendAsset.value.toUpperCase(),
+      ref_id: reference.toString(),
       payment_method: isBankTransfer ? "bank_transfer" : "mobile_money",
       ...(isBankTransfer
         ? {
@@ -291,10 +306,10 @@ export const BuyMain = ({ session_email }: { session_email: string }) => {
 
   const getButtonText = () => {
     if (!session_email) return "Sign in to continue";
-    if (quoteState === "loading") return "Fetching quote...";
+    if (quoteState === "loading") return "Calculating";
     if (quoteState === "confirming") return "Processing...";
     if (quoteState === "ready") return "Continue";
-    return "Request quote";
+    return "See how much";
   };
 
   return (

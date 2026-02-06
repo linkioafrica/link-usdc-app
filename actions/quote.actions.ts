@@ -24,7 +24,7 @@ export const requestQuoteAction = async (
   const session = await auth();
 
   try {
-    const response = await fetch(`${server}/onchain/request-rate-quote`, {
+    const response = await fetch(`${server}/onchain/request_rate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -51,6 +51,7 @@ export interface ConfirmOnrampRequest {
   bank_account_number?: string; // bank account or phone number
   phone_number?: string;
   payment_method: string;
+  ref_id?: string;
 }
 
 export interface ConfirmOnrampResponse {
@@ -63,22 +64,22 @@ export interface ConfirmOnrampResponse {
   expires_at?: string;
 }
 
-export const confirmOnrampAction = async (
+export const confirmQuoteAction = async (
   payload: ConfirmOnrampRequest
 ): Promise<ConfirmOnrampResponse> => {
   const session = await auth();
 
   try {
-    const response = await fetch(`${server}/onchain/direct-onramp-request`, {
+    const response = await fetch(`${server}/onchain/direct_onramp_request`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        customer_id: session?.user?.customerId,
         quote_id: payload.quote_id,
         send_asset: payload.send_asset,
         bank_account_number: payload.bank_account_number,
         phone_number: payload.phone_number,
         payment_method: payload.payment_method,
+        ref_id: payload.ref_id,
       }),
     });
 
@@ -91,6 +92,8 @@ export const confirmOnrampAction = async (
 
 // Confirm deposit - called when user clicks "Payment made"
 export interface ConfirmDepositRequest {
+  ref_id: string;
+  type: string;
   wallet_address: string;
   network: string;
   memo?: string;
@@ -108,11 +111,13 @@ export const confirmDepositAction = async (
   const session = await auth();
 
   try {
-    const response = await fetch(`${server}/onchain/direct-onramp-confirm`, {
+    const response = await fetch(`${server}/onchain/direct_onramp_confirm`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         user_id: session?.user?.id,
+        ref_id: payload.ref_id,
+        type: payload.type,
         wallet_address: payload.wallet_address,
         network: payload.network,
         memo: payload.memo,

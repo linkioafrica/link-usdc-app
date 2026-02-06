@@ -22,7 +22,9 @@ export const ConfirmForm = () => {
   const { rampData } = useRampContext();
   const router = useRouter();
 
-  // console.log("Buydata", buyData);
+  // console.log("Buy-data", buyData);
+  // console.log("Ramp-data", rampData);
+
   const findNetwork = networkOptions.find(
     (item) => item.label === buyData?.network
   );
@@ -108,8 +110,8 @@ export const ConfirmForm = () => {
             type="text"
             name="wallet_address"
             disabled={buyData?.network === "" ? true : false}
-            readOnly={Boolean(buyData?.user_wallet)}
-            defaultValue={buyData?.user_wallet || ""}
+            readOnly={Boolean(buyData?.wallet_address)}
+            defaultValue={buyData?.wallet_address || ""}
             required
             className="outline-none bg-slate-100 py-5 rounded-md border-none text-base"
           />

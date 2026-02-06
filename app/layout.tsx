@@ -6,8 +6,6 @@ import RampContextProvider from "@/contexts/ramp.context";
 import BuyContextProvider from "@/contexts/buy.context";
 import SellContextProvider from "@/contexts/sell.context";
 import InitContextProvider from "@/contexts/init.context";
-import SellRatesContextProvider from "@/contexts/sellRates";
-import BuyRatesContextProvider from "@/contexts/buyRates.context";
 import { Header } from "@/components/Header";
 import { MainFooter } from "@/components/MainFooter";
 import Image from "next/image";
@@ -37,8 +35,6 @@ export default function RootLayout({
 
         <div className="container" id="ramp-container">
           <div className="aspect-ratio">
-            <BuyRatesContextProvider>
-              <SellRatesContextProvider>
                 <InitContextProvider>
                   <RampContextProvider>
                     <BuyContextProvider>
@@ -46,9 +42,6 @@ export default function RootLayout({
                     </BuyContextProvider>
                   </RampContextProvider>
                 </InitContextProvider>
-              </SellRatesContextProvider>
-            </BuyRatesContextProvider>
-
             <Footer />
           </div>
         </div>

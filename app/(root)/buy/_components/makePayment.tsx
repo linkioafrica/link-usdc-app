@@ -6,7 +6,7 @@ import { useRampContext } from "@/contexts/ramp.context";
 import { useRouter } from "next/navigation";
 import { CopyButton } from "@/components/CopyButton";
 import { confirmDepositAction } from "@/actions/quote.actions";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 interface VendorInfo {
@@ -24,14 +24,16 @@ export const MakePayment = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // console.log("Buydata", buyData);
-  // console.log("vendor_details raw:", buyData.vendor_details);
+  // Auto-hide error after 2 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
-  // Parse vendor_details from context
-  // Formats:
-  // Mobile money (2 lines): "0549468390\nGLACES VENTURES / Gloria Glago"
-  // Bank transfer (3 lines): "1234567890\nAccount Name\nBank Name"
-  // Or JSON format: { account_name, bank_name, account_number, phone_number }
   const vendorInfo: VendorInfo | null = buyData.vendor_details
     ? (() => {
         // First try to parse as JSON
@@ -70,23 +72,33 @@ export const MakePayment = () => {
       })()
     : null;
 
-  console.log("Parsed vendorInfo:", vendorInfo);
+  // console.log("Parsed vendorInfo:", vendorInfo);
 
   // Determine if bank transfer or mobile money (bank transfer has bank_name)
   const isBankTransfer = Boolean(vendorInfo?.bank_name);
 
   // Format amount with commas
   const formattedAmount = rampData?.send_amount?.toLocaleString() || "0";
+  const reference_id = rampData?.reference;
+  // console.log("Reference ID:", reference_id);
 
   const handlePaymentMade = async () => {
     setLoading(true);
     setError(null);
 
+    if (!reference_id) {
+      setError("Reference ID is missing. Please try again.");
+      setLoading(false);
+      return;
+    }
+
     const result = await confirmDepositAction({
+      ref_id: reference_id,
+      type: "onramp",
       wallet_address: buyData.wallet_address,
       network: buyData.network,
       memo: buyData.stellar_memo || undefined,
-      ticket_id: buyData.ticket_id || buyData.transaction_id || "",
+      ticket_id: rampData.order_id,
     });
     // console.log("Confirm deposit result", result);
 
